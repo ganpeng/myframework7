@@ -139,7 +139,9 @@
                 -->
             <div class="page-content pull-to-refresh-content">
                 <div class="pull-to-refresh-layer">
-                    <div class="preloader"></div>
+                    <div class="preloader"><span class="preloader-inner"><span class="preloader-inner-gap"></span><span class="preloader-inner-left"><span class="preloader-inner-half-circle"></span></span><span class="preloader-inner-right"><span class="preloader-inner-half-circle"></span></span>
+                        </span>
+                    </div>
                     <div class="pull-to-refresh-arrow"></div>
                 </div>
                 <div class="list-block media-list">
@@ -177,35 +179,64 @@
         var authors = ['Beatles', 'Queen', 'Michael Jackson', 'Red Hot Chili Peppers'];
 
         var page = 1;
+
         // 下拉刷新页面
         var ptrContent = $$('.pull-to-refresh-content');
 
         // 添加'refresh'监听器
         ptrContent.on('refresh', function(e) {
-			$$.ajax({
-			  url: 'http://api.randomuser.me/',
-  			  dataType: 'json',
-			  data : {
-			  	page : page++,
-			  	results : 1,
-			  	seed : 'abc'
-			  },
-			  success: function(data){
-			  	console.log(data);
-                var itemHTML = '<li class="item-content">' +
-                    '<div class="item-media"><img src="" width="44"/></div>' +
-                    '<div class="item-inner">' +
-                    '<div class="item-title-row">' +
-                    '<div class="item-title">' + data.results[0].email + '</div>' +
-                    '</div>' +
-                    '<div class="item-subtitle">' + data.results[0].phone + '</div>' +
-                    '</div>' +
-                    '</li>';			  	
-                ptrContent.find('ul').prepend(itemHTML);
-                myApp.pullToRefreshDone();
-			  }
-			});
+
+            var data = {
+                page: page++,
+                results: 1,
+                seed: 'abc'
+            };
+
+            fetchData(data)
+                .then(function(res) {
+                    return renderData(res);
+                })
+                .then(function(html) {
+                    updateHtml(html);
+                })
+                .catch(function(err) {
+                    console.log(err);
+                })
+
         });
+
+        function fetchData(data) {
+            return new Promise(function(resolve, reject) {
+                $$.ajax({
+                    url: 'http://api.randomuser.me/',
+                    dataType: 'json',
+                    data: data,
+                    success: function(res) {
+                        resolve(res);
+                    },
+                    error: function(err) {
+                        reject(err);
+                    }
+                })
+            })
+        }
+
+        function renderData(data) {
+            return '<li class="item-content">' +
+                '<div class="item-media"><img src="' + data.results[0].picture.thumbnail + '" width="44"/></div>' +
+                '<div class="item-inner">' +
+                '<div class="item-title-row">' +
+                '<div class="item-title">' + data.results[0].email + '</div>' +
+                '</div>' +
+                '<div class="item-subtitle">' + data.results[0].phone + '</div>' +
+                '</div>' +
+                '</li>';
+        }
+
+        function updateHtml(html) {
+            ptrContent.find('ul').prepend(html);
+            myApp.pullToRefreshDone();
+        }
     }
     </script>
 </body>
