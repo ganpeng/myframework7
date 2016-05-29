@@ -174,9 +174,6 @@
 
         var $$ = Dom7;
 
-        // 随意编造的内容
-        var songs = ['Yellow Submarine', 'Don\'t Stop Me Now', 'Billie Jean', 'Californication'];
-        var authors = ['Beatles', 'Queen', 'Michael Jackson', 'Red Hot Chili Peppers'];
 
         var page = 1;
 
@@ -188,13 +185,13 @@
 
             var data = {
                 page: page++,
-                results: 1,
+                results: 5,
                 seed: 'abc'
             };
 
             fetchData(data)
                 .then(function(res) {
-                    return renderData(res);
+                    return eachData(res.results);
                 })
                 .then(function(html) {
                     updateHtml(html);
@@ -221,14 +218,21 @@
             })
         }
 
+
+        function eachData(data) {
+           return data.map(function(item) {
+                return renderData(item);
+           }).join('');
+        }
+
         function renderData(data) {
             return '<li class="item-content">' +
-                '<div class="item-media"><img src="' + data.results[0].picture.thumbnail + '" width="44"/></div>' +
+                '<div class="item-media"><img src="' + data.picture.thumbnail + '" width="44"/></div>' +
                 '<div class="item-inner">' +
                 '<div class="item-title-row">' +
-                '<div class="item-title">' + data.results[0].email + '</div>' +
+                '<div class="item-title">' + data.email + '</div>' +
                 '</div>' +
-                '<div class="item-subtitle">' + data.results[0].phone + '</div>' +
+                '<div class="item-subtitle">' + data.phone + '</div>' +
                 '</div>' +
                 '</li>';
         }
