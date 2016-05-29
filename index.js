@@ -308,10 +308,10 @@ var $$ = Dom7;
 
 
 // var photoBrowserPhotos = [
-// 	{
-// 		url: 'img/beach.jpg',
-// 		caption: 'Amazing beach in Goa, India'
-// 	},
+//  {
+//    url: 'img/beach.jpg',
+//    caption: 'Amazing beach in Goa, India'
+//  },
 //     'http://placekitten.com/1024/1024',
 //     'img/lock.jpg',
 //     {
@@ -374,51 +374,85 @@ var $$ = Dom7;
 // myApp.onPageInit('infinite-scroll', function (page) {
 // Loading flag
 var loading = false;
- 
+var page = 1;
 // Last loaded index
-var lastIndex = $$('.list-block li').length;
- 
+// var lastIndex = $$('.list-block li').length;
+
 // Max items to load
-var maxItems = 60;
- 
+// var maxItems = 60;
+
 // Append items per load
-var itemsPerLoad = 20;
- 
+// var itemsPerLoad = 20;
+
 // Attach 'infinite' event handler
-$$('.infinite-scroll').on('infinite', function () {
- 
-  // Exit, if loading in progress
-  if (loading) return;
- 
-  // Set loading flag
-  loading = true;
- 
-  // Emulate 1s loading
-  setTimeout(function () {
-    // Reset loading flag
+$$('.infinite-scroll').on('infinite', function() {
+
+    // Exit, if loading in progress
+    if (loading) return;
+
+    // Set loading flag
+    loading = true;
+
+    var data = {
+        page: page++,
+        results: 5,
+        seed: 'abc'
+    };
+
+    fetchData(data)
+        .then(function(res) {
+            return eachData(res.results);
+        })
+        .then(function(html) {
+            updateHtml(html);
+        })
+        .catch(function(err) {
+            console.log(err);
+        })
+
+});
+
+function fetchData(data) {
+    return new Promise(function(resolve, reject) {
+        $$.ajax({
+            url: 'http://api.randomuser.me/',
+            dataType: 'json',
+            data: data,
+            success: function(res) {
+                resolve(res);
+            },
+            error: function(err) {
+                reject(err);
+            }
+        })
+    })
+}
+
+
+function eachData(data) {
+    return data.map(function(item) {
+        return renderData(item);
+    }).join('');
+}
+
+function renderData(data) {
+    return '<li class="item-content">' +
+        '<div class="item-media"><img src="' + data.picture.thumbnail + '" width="44"/></div>' +
+        '<div class="item-inner">' +
+        '<div class="item-title-row">' +
+        '<div class="item-title">' + data.email + '</div>' +
+        '</div>' +
+        '<div class="item-subtitle">' + data.phone + '</div>' +
+        '</div>' +
+        '</li>';
+}
+
+function updateHtml(html) {
+    $$('.list-block').find('ul').append(html);
     loading = false;
- 
-    if (lastIndex >= maxItems) {
-      // Nothing more to load, detach infinite scroll events to prevent unnecessary loadings
-      myApp.detachInfiniteScroll($$('.infinite-scroll'));
-      // Remove preloader
-      $$('.infinite-scroll-preloader').remove();
-      return;
-    }
- 
-    // Generate new items HTML
-    var html = '';
-    for (var i = lastIndex + 1; i <= lastIndex + itemsPerLoad; i++) {
-      html += '<li class="item-content"><div class="item-inner"><div class="item-title">Item ' + i + '</div></div></li>';
-    }
- 
-    // Append new items
-    $$('.list-block ul').append(html);
- 
-    // Update last loaded index
-    lastIndex = $$('.list-block li').length;
-  }, 1000);
-});          
+    // ptrContent.find('ul').prepend(html);
+    // myApp.pullToRefreshDone();
+}
 // });
 
 /* ===== Notifications Page ===== */
